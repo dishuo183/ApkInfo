@@ -24,11 +24,11 @@ jobs:
     - name: 设置 NuGet
       uses: nuget/setup-nuget@v2
     
-    - name: 复制资源文件
+    - name: 检查资源文件
       run: |
-        Copy-Item -Path "aapt2.exe" -Destination "aapt2.exe" -Force
-        New-Item -ItemType Directory -Path "res" -Force
-        Copy-Item -Path "res/android.png" -Destination "res/android.png" -Force
+        if (-not (Test-Path "aapt2.exe")) { Write-Error "aapt2.exe 不存在！" }
+        if (-not (Test-Path "res/android.png")) { Write-Error "res/android.png 不存在！" }
+        Write-Host "资源文件检查通过"
       shell: powershell
     
     - name: 还原 NuGet 包
