@@ -30,8 +30,8 @@ jobs:
           Write-Error "bin/aapt2.exe not found!" 
           exit 1
         }
-        if (-not (Test-Path "bin/res/android.png")) { 
-          Write-Error "bin/res/android.png not found!" 
+        if (-not (Test-Path "bin/android.png")) { 
+          Write-Error "bin/android.png not found!" 
           exit 1
         }
         Write-Host "Resource files check passed"
@@ -41,7 +41,7 @@ jobs:
       run: |
         Copy-Item -Path "bin/aapt2.exe" -Destination "aapt2.exe" -Force
         New-Item -ItemType Directory -Path "res" -Force
-        Copy-Item -Path "bin/res/android.png" -Destination "res/android.png" -Force
+        Copy-Item -Path "bin/android.png" -Destination "res/android.png" -Force
       shell: powershell
     
     - name: 还原 NuGet 包
