@@ -65,24 +65,27 @@ jobs:
     - name: 列出编译输出文件
       run: |
         Write-Host "Build output files:"
-        Get-ChildItem -Path "bin/Release/" -Recurse | Select-Object FullName
+        Get-ChildItem -Path "bin/Release/" | Select-Object Name, Length
       shell: powershell
     
-    - name: 创建发布目录
+    - name: 查找并重命名 exe 文件
       run: |
-        New-Item -ItemType Directory -Path "release" -Force
-        # 使用通配符查找 exe 文件，避免中文编码问题
-        $exeFile = Get-ChildItem -Path "bin/Release/" -Filter "*.exe" | Select-Object -First 1
-        if ($exeFile) {
-          Copy-Item -Path $exeFile.FullName -Destination "release/ApkAnalyzer.exe" -Force
-          Write-Host "Copied: $($exeFile.Name) -> ApkAnalyzer.exe"
-        } else {
-          Write-Error "No exe file found!"
-          exit 1
+        $exeFiles = Get-ChildItem -Path "bin/Release/" -Filter "*.exe"
+        Write-Host "Found $($exeFiles.Count) exe files:"
+        foreach ($file in $exeFiles) {
+          Write-Host "  - $($file.Name) ($($file.Length) bytes)"
         }
-        Copy-Item -Path "bin/Release/aapt2.exe" -Destination "release/" -Force
-        if (Test-Path "bin/Release/res") {
-          Copy-Item -Path "bin/Release/res" -Destination "release/" -Recurse -Force
+        
+        # 查找主程序（不是 aapt2.exe）
+        $mainExe = $exeFiles | Where-Object { $_.Name -ne "aapt2.exe" } | Select-Object -First 1
+        
+        if ($mainExe) {
+          Copy-Item -Path $mainExe.FullName -Destination "ApkAnalyzer.exe" -Force
+          Write-Host "Main program found: $($mainExe.Name)"
+          Write-Host "Renamed to: ApkAnalyzer.exe"
+        } else {
+          Write-Error "Main program exe not found!"
+          exit 1
         }
       shell: powershell
     
@@ -90,5 +93,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: APK-Analyzer-WinForms
-        path: release/
+        path: ApkAnalyzer.exe
         retention-days: 30

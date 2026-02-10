@@ -71,11 +71,14 @@ namespace ApkAnalyzer
                 }
                 else
                 {
-                    // 加载默认图标
-                    string defaultIconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "res", "android.png");
-                    if (File.Exists(defaultIconPath))
+                    // 加载嵌入的默认图标
+                    byte[] defaultIcon = analyzer.GetDefaultIcon();
+                    if (defaultIcon != null)
                     {
-                        picIcon.Image = Image.FromFile(defaultIconPath);
+                        using (var ms = new MemoryStream(defaultIcon))
+                        {
+                            picIcon.Image = Image.FromStream(ms);
+                        }
                     }
                 }
 

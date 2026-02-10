@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -26,7 +27,43 @@ namespace ApkAnalyzer
 
         public ApkAnalyzer()
         {
-            aapt2Path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "aapt2.exe");
+            // 从嵌入资源中提取 aapt2.exe 到临时目录
+            aapt2Path = Path.Combine(Path.GetTempPath(), "aapt2.exe");
+            
+            if (!File.Exists(aapt2Path))
+            {
+                ExtractEmbeddedResource("ApkAnalyzer.aapt2.exe", aapt2Path);
+            }
+        }
+
+        private void ExtractEmbeddedResource(string resourceName, string outputPath)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            using (var stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                    throw new Exception($"无法找到嵌入资源: {resourceName}");
+
+                using (var fileStream = File.Create(outputPath))
+                {
+                    stream.CopyTo(fileStream);
+                }
+            }
+        }
+
+        public byte[] GetDefaultIcon()
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            using (var stream = assembly.GetManifestResourceStream("ApkAnalyzer.res.android.png"))
+            {
+                if (stream == null) return null;
+                
+                using (var ms = new MemoryStream())
+                {
+                    stream.CopyTo(ms);
+                    return ms.ToArray();
+                }
+            }
         }
 
         public ApkInfo AnalyzeApk(string filePath)
