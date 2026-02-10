@@ -124,9 +124,6 @@ namespace ApkAnalyzer
             this.Controls.Add(picIcon);
 
             int yPos = 210;
-            int labelWidth = 80;
-            int textBoxWidth = 340;
-            int buttonWidth = 60;
             int spacing = 45;
 
             // 文件名

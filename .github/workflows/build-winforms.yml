@@ -44,6 +44,18 @@ jobs:
         Copy-Item -Path "bin/android.png" -Destination "res/android.png" -Force
       shell: powershell
     
+    - name: 转换 PNG 为 ICO
+      run: |
+        Add-Type -AssemblyName System.Drawing
+        $png = [System.Drawing.Image]::FromFile("$PWD\bin\android.png")
+        $icon = [System.Drawing.Icon]::FromHandle(([System.Drawing.Bitmap]$png).GetHicon())
+        $stream = [System.IO.File]::Create("$PWD\icon.ico")
+        $icon.Save($stream)
+        $stream.Close()
+        $png.Dispose()
+        Write-Host "Icon created successfully"
+      shell: powershell
+    
     - name: 还原 NuGet 包
       run: nuget restore ApkAnalyzer.csproj -PackagesDirectory packages
     
